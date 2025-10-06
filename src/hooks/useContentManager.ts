@@ -78,10 +78,11 @@ export interface HomePage {
 }
 
 export const useContentManager = () => {
-  const { 
-    portfolioProjects, 
-    servicePages, 
+  const {
+    portfolioProjects,
+    servicePages,
     homePage,
+    loading,
     createPortfolioProject,
     updatePortfolioProject,
     deletePortfolioProject,
@@ -91,42 +92,47 @@ export const useContentManager = () => {
     updateHomePage
   } = useSupabaseData();
 
+  // Use default data if Supabase is empty or still loading
+  const actualPortfolioProjects = portfolioProjects.length > 0 ? portfolioProjects : (loading ? [] : getDefaultPortfolioProjects() as any);
+  const actualServicePages = servicePages.length > 0 ? servicePages : (loading ? [] : getDefaultServicePages() as any);
+  const actualHomePage = homePage || (loading ? null : getDefaultHomePage());
+
   // Convert homePage to match the expected format
-  const convertedHomePage: HomePage | null = homePage ? {
+  const convertedHomePage: HomePage | null = actualHomePage && typeof actualHomePage === 'object' && 'hero_title' in actualHomePage ? {
     hero: {
-      title: homePage.hero_title,
-      subtitle: homePage.hero_subtitle,
-      description: homePage.hero_description,
-      primaryButton: { 
-        text: homePage.hero_primary_button_text, 
-        link: homePage.hero_primary_button_link 
+      title: actualHomePage.hero_title,
+      subtitle: actualHomePage.hero_subtitle,
+      description: actualHomePage.hero_description,
+      primaryButton: {
+        text: actualHomePage.hero_primary_button_text,
+        link: actualHomePage.hero_primary_button_link
       },
-      secondaryButton: { 
-        text: homePage.hero_secondary_button_text, 
-        link: homePage.hero_secondary_button_link 
+      secondaryButton: {
+        text: actualHomePage.hero_secondary_button_text,
+        link: actualHomePage.hero_secondary_button_link
       }
     },
-    stats: homePage.stats || [],
+    stats: actualHomePage.stats || [],
     services: {
-      title: homePage.services_title,
-      description: homePage.services_description,
-      featured: homePage.featured_services || []
+      title: actualHomePage.services_title,
+      description: actualHomePage.services_description,
+      featured: actualHomePage.featured_services || []
     },
-    testimonials: homePage.testimonials || [],
+    testimonials: actualHomePage.testimonials || [],
     cta: {
-      title: homePage.cta_title,
-      description: homePage.cta_description,
-      primaryButton: { 
-        text: homePage.cta_primary_button_text, 
-        link: homePage.cta_primary_button_link 
+      title: actualHomePage.cta_title,
+      description: actualHomePage.cta_description,
+      primaryButton: {
+        text: actualHomePage.cta_primary_button_text,
+        link: actualHomePage.cta_primary_button_link
       },
-      secondaryButton: { 
-        text: homePage.cta_secondary_button_text, 
-        link: homePage.cta_secondary_button_link 
+      secondaryButton: {
+        text: actualHomePage.cta_secondary_button_text,
+        link: actualHomePage.cta_secondary_button_link
       }
     },
-    socialLinks: homePage.social_links || []
-  } : null;
+    socialLinks: actualHomePage.social_links || []
+  } : actualHomePage as HomePage;
 
   const saveHomePage = async (homepage: HomePage) => {
     await updateHomePage({
@@ -161,8 +167,8 @@ export const useContentManager = () => {
   };
 
   return {
-    portfolioProjects: portfolioProjects.map(p => ({ ...p, order: p.display_order })),
-    servicePages: servicePages.map(s => ({ ...s, order: s.display_order })),
+    portfolioProjects: actualPortfolioProjects.map((p: any) => ({ ...p, order: p.display_order })),
+    servicePages: actualServicePages.map((s: any) => ({ ...s, order: s.display_order })),
     homePage: convertedHomePage,
     addPortfolioProject,
     updatePortfolioProject,

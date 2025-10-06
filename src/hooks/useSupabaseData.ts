@@ -56,89 +56,127 @@ export const useSupabaseData = () => {
   };
 
   const loadForms = async () => {
-    const { data, error } = await supabase
-      .from('contact_forms')
-      .select('*')
-      .order('submitted_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('contact_forms')
+        .select('*')
+        .order('submitted_at', { ascending: false });
 
-    if (error) {
-      console.error('Error loading forms:', error);
-      return;
+      if (error) {
+        console.error('Error loading forms:', error);
+        setForms([]);
+        calculateStats([]);
+        return;
+      }
+
+      setForms(data || []);
+      calculateStats(data || []);
+    } catch (err) {
+      console.error('Error loading forms:', err);
+      setForms([]);
+      calculateStats([]);
     }
-
-    setForms(data || []);
-    calculateStats(data || []);
   };
 
   const loadNewsletter = async () => {
-    const { data, error } = await supabase
-      .from('newsletter_subscribers')
-      .select('*')
-      .order('subscribed_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('newsletter_subscribers')
+        .select('*')
+        .order('subscribed_at', { ascending: false });
 
-    if (error) {
-      console.error('Error loading newsletter:', error);
-      return;
+      if (error) {
+        console.error('Error loading newsletter:', error);
+        setNewsletter([]);
+        return;
+      }
+
+      setNewsletter(data || []);
+    } catch (err) {
+      console.error('Error loading newsletter:', err);
+      setNewsletter([]);
     }
-
-    setNewsletter(data || []);
   };
 
   const loadBlogPosts = async () => {
-    const { data, error } = await supabase
-      .from('blog_posts')
-      .select('*')
-      .order('published_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .order('published_at', { ascending: false });
 
-    if (error) {
-      console.error('Error loading blog posts:', error);
-      return;
+      if (error) {
+        console.error('Error loading blog posts:', error);
+        setBlogPosts([]);
+        return;
+      }
+
+      setBlogPosts(data || []);
+    } catch (err) {
+      console.error('Error loading blog posts:', err);
+      setBlogPosts([]);
     }
-
-    setBlogPosts(data || []);
   };
 
   const loadPortfolioProjects = async () => {
-    const { data, error } = await supabase
-      .from('portfolio_projects')
-      .select('*')
-      .order('display_order', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('portfolio_projects')
+        .select('*')
+        .order('display_order', { ascending: true });
 
-    if (error) {
-      console.error('Error loading portfolio:', error);
-      return;
+      if (error) {
+        console.error('Error loading portfolio:', error);
+        setPortfolioProjects([]);
+        return;
+      }
+
+      setPortfolioProjects(data || []);
+    } catch (err) {
+      console.error('Error loading portfolio:', err);
+      setPortfolioProjects([]);
     }
-
-    setPortfolioProjects(data || []);
   };
 
   const loadServicePages = async () => {
-    const { data, error } = await supabase
-      .from('service_pages')
-      .select('*')
-      .order('display_order', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('service_pages')
+        .select('*')
+        .order('display_order', { ascending: true });
 
-    if (error) {
-      console.error('Error loading service pages:', error);
-      return;
+      if (error) {
+        console.error('Error loading service pages:', error);
+        setServicePages([]);
+        return;
+      }
+
+      setServicePages(data || []);
+    } catch (err) {
+      console.error('Error loading service pages:', err);
+      setServicePages([]);
     }
-
-    setServicePages(data || []);
   };
 
   const loadHomePage = async () => {
-    const { data, error } = await supabase
-      .from('homepage_content')
-      .select('*')
-      .limit(1)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('homepage_content')
+        .select('*')
+        .limit(1)
+        .single();
 
-    if (error && error.code !== 'PGRST116') {
-      console.error('Error loading homepage:', error);
-      return;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading homepage:', error);
+        setHomePage(null);
+        return;
+      }
+
+      setHomePage(data);
+    } catch (err) {
+      console.error('Error loading homepage:', err);
+      setHomePage(null);
     }
-
-    setHomePage(data);
   };
 
   const calculateStats = (formsData: ContactForm[]) => {
