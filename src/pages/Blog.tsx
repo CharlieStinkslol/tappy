@@ -789,7 +789,7 @@ Ensure your NAP information is identical across all platforms to build trust wit
 ### Schema Markup
 Implement local business schema to help search engines understand your business:
 
-\`\`\\`json
+\`\`\`json
 {
   "@type": "LocalBusiness",
   "name": "Your Business Name",
@@ -907,7 +907,7 @@ Implement proper cookie consent mechanisms:
 ## Technical Implementation
 
 ### Consent Management
-\`\`\\`javascript
+\`\`\`javascript
 // Example consent management
 function setCookieConsent(category, consent) {
   localStorage.setItem(\`consent_\${category}\`, consent);
@@ -1201,7 +1201,7 @@ Create comprehensive URL maps:
 - Performance testing
 
 ### Redirect Implementation
-\`\`\\`apache
+\`\`\`apache
 # Example .htaccess redirects
 Redirect 301 /old-page/ https://newsite.com/new-page/
 Redirect 301 /old-category/ https://newsite.com/new-category/
@@ -1829,7 +1829,7 @@ Measures visual stability - should be less than 0.1.
 - Use efficient image formats
 
 ### Technical Implementation
-\`\`\\`html
+\`\`\`html
 <!-- Preload critical resources -->
 <link rel="preload" href="hero-image.jpg" as="image">
 <link rel="preload" href="critical.css" as="style">
@@ -2324,7 +2324,7 @@ For expert guidance on choosing and implementing the right e-commerce platform, 
 
 ### Child Themes
 Always use child themes for customisations:
-\`\`\\`php
+\`\`\`php
 <?php
 // Child theme functions.php
 function child_theme_enqueue_styles() {
@@ -2458,7 +2458,7 @@ For expert theme selection and customisation, [contact our WordPress specialists
 ### Progressive Enhancement
 Start with mobile design and enhance for larger screens:
 
-\`\`\\`css
+\`\`\`css
 /* Mobile-first CSS approach */
 .container {
   width: 100%;
@@ -2704,7 +2704,7 @@ Our [Website Development](/services/website-development) services include mobile
 - Core Web Vitals compliance
 
 ### Content Structure
-\`\`\\`html
+\`\`\`html
 <!-- Optimal content structure -->
 <article>
   <h1>Main Article Title</h1>
@@ -2895,7 +2895,7 @@ Our [WordPress Development](/services/wordpress-development) services include co
 5. Install tracking code
 
 ### WordPress Integration
-\`\`\\`php
+\`\`\`php
 // Add GA4 tracking code to WordPress
 function add_ga4_tracking() {
     ?>
@@ -3438,7 +3438,7 @@ Highest accessibility standards:
 ## Technical Implementation
 
 ### HTML Best Practices
-\`\`\\`html
+\`\`\`html
 <!-- Semantic HTML structure -->
 <main role="main">
   <h1>Page Title</h1>
@@ -3456,7 +3456,7 @@ Highest accessibility standards:
 \`\`\`
 
 ### CSS Accessibility
-\`\`\\`css
+\`\`\`css
 /* Focus indicators */
 a:focus, button:focus {
   outline: 2px solid #0066cc;
@@ -3481,7 +3481,7 @@ a:focus, button:focus {
 \`\`\`
 
 ### JavaScript Accessibility
-\`\`\\`javascript
+\`\`\`javascript
 // Keyboard navigation support
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Enter' || e.key === ' ') {
