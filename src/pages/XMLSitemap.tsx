@@ -73,11 +73,19 @@ const XMLSitemap = () => {
 
   const generateXMLSitemap = () => {
     const baseUrl = window.location.origin;
-    
+
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-    
-    sitemapPages.forEach(page => {
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
+    xml += `        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n`;
+    xml += `        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9\n`;
+    xml += `        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">\n`;
+
+    const publicPages = sitemapPages.filter(page =>
+      !page.url.includes('/admin') &&
+      !page.url.includes('/blog-management')
+    );
+
+    publicPages.forEach(page => {
       xml += `  <url>\n`;
       xml += `    <loc>${baseUrl}${page.url}</loc>\n`;
       xml += `    <lastmod>${page.lastmod}</lastmod>\n`;
@@ -85,9 +93,9 @@ const XMLSitemap = () => {
       xml += `    <priority>${page.priority}</priority>\n`;
       xml += `  </url>\n`;
     });
-    
+
     xml += `</urlset>`;
-    
+
     return xml;
   };
 
@@ -104,10 +112,15 @@ const XMLSitemap = () => {
     URL.revokeObjectURL(url);
   };
 
+  const publicPages = sitemapPages.filter(page =>
+    !page.url.includes('/admin') &&
+    !page.url.includes('/blog-management')
+  );
+
   const sitemapStats = [
-    { label: 'Total Pages', value: sitemapPages.length },
-    { label: 'Service Pages', value: sitemapPages.filter(p => p.url.startsWith('/services')).length },
-    { label: 'High Priority', value: sitemapPages.filter(p => parseFloat(p.priority) >= 0.8).length },
+    { label: 'Total Pages', value: publicPages.length },
+    { label: 'Service Pages', value: publicPages.filter(p => p.url.startsWith('/services')).length },
+    { label: 'High Priority', value: publicPages.filter(p => parseFloat(p.priority) >= 0.8).length },
     { label: 'Last Updated', value: new Date().toLocaleDateString() }
   ];
 
@@ -193,7 +206,7 @@ const XMLSitemap = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
-                  {sitemapPages.map((page, index) => (
+                  {publicPages.map((page, index) => (
                     <tr key={index} className="hover:bg-gray-700/50">
                       <td className="px-6 py-4">
                         <div className="flex items-center">
@@ -294,7 +307,10 @@ const XMLSitemap = () => {
             <pre className="text-sm text-gray-300 overflow-x-auto">
               <code>
 {`<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
   <url>
     <loc>${window.location.origin}/</loc>
     <lastmod>${lastModified}</lastmod>
@@ -305,9 +321,9 @@ const XMLSitemap = () => {
     <loc>${window.location.origin}/services/wordpress-development</loc>
     <lastmod>${lastModified}</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
-  <!-- Additional ${sitemapPages.length - 2} pages... -->
+  <!-- Additional ${publicPages.length - 2} public pages... -->
 </urlset>`}
               </code>
             </pre>

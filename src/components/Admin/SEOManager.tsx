@@ -28,6 +28,56 @@ const SEOManager: React.FC = () => {
   const [activeSection, setActiveSection] = useState('basic');
   const [customMetaFields, setCustomMetaFields] = useState<Array<{name?: string; property?: string; content: string}>>([]);
 
+  const generateGoogleCompliantSitemap = () => {
+    const baseUrl = window.location.origin;
+    const currentDate = new Date().toISOString();
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
+    xml += `        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n`;
+    xml += `        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9\n`;
+    xml += `        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">\n`;
+
+    const sitemapPages = pageRoutes
+      .filter(route => !route.path.includes('/admin') && !route.path.includes('/blog-management'))
+      .map(route => {
+        let priority = '0.5';
+        let changefreq = 'monthly';
+
+        if (route.path === '/') {
+          priority = '1.0';
+          changefreq = 'weekly';
+        } else if (route.path === '/contact' || route.path === '/blog') {
+          priority = '0.9';
+          changefreq = 'weekly';
+        } else if (route.path.startsWith('/services/')) {
+          priority = '0.8';
+          changefreq = 'monthly';
+        } else if (route.path.startsWith('/blog/')) {
+          priority = '0.7';
+          changefreq = 'monthly';
+        } else if (route.path === '/privacy' || route.path === '/terms' || route.path === '/cookies') {
+          priority = '0.3';
+          changefreq = 'yearly';
+        }
+
+        return { ...route, priority, changefreq };
+      });
+
+    sitemapPages.forEach(page => {
+      xml += `  <url>\n`;
+      xml += `    <loc>${baseUrl}${page.path}</loc>\n`;
+      xml += `    <lastmod>${currentDate}</lastmod>\n`;
+      xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
+      xml += `    <priority>${page.priority}</priority>\n`;
+      xml += `  </url>\n`;
+    });
+
+    xml += `</urlset>`;
+
+    return xml;
+  };
+
   useEffect(() => {
     const settings = getPageSEOSettings(selectedPage);
     setSeoSettings(settings);
@@ -589,6 +639,206 @@ const SEOManager: React.FC = () => {
                     <p className="text-sm">Click "Add Meta Tag" to create custom meta tags.</p>
                   </div>
                 )}
+              </div>
+            </motion.div>
+          )}
+
+          {activeSection === 'sitemap' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              <div>
+                <h4 className="text-lg font-semibold text-white mb-4">XML Sitemap Generator</h4>
+                <p className="text-gray-300 mb-6">Generate a Google-compliant XML sitemap for your website.</p>
+
+                <div className="bg-gray-700 rounded-lg p-6 border border-gray-600 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="font-medium text-white">Current Sitemap Status</h5>
+                      <p className="text-sm text-gray-400">Last generated: {new Date().toLocaleDateString()}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        const sitemap = generateGoogleCompliantSitemap();
+                        const blob = new Blob([sitemap], { type: 'application/xml' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'sitemap.xml';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        alert('Sitemap downloaded successfully!');
+                      }}
+                      className="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg transition-colors duration-300"
+                    >
+                      Download XML Sitemap
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-600">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-400">{pageRoutes.length}</div>
+                      <div className="text-sm text-gray-400">Total Pages</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-400">{pageRoutes.filter(p => !p.path.includes('/admin')).length}</div>
+                      <div className="text-sm text-gray-400">Public Pages</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-400">{pageRoutes.filter(p => p.path.includes('/services')).length}</div>
+                      <div className="text-sm text-gray-400">Service Pages</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-orange-400">{pageRoutes.filter(p => p.path.includes('/blog')).length}</div>
+                      <div className="text-sm text-gray-400">Blog Pages</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-blue-900/20 border border-blue-500/50 rounded-lg p-4 mt-4">
+                  <h5 className="font-medium text-blue-400 mb-2">Google Sitemap Guidelines</h5>
+                  <ul className="text-sm text-blue-300 space-y-1">
+                    <li>✓ Uses UTF-8 encoding</li>
+                    <li>✓ Includes valid lastmod dates in W3C format</li>
+                    <li>✓ Sets appropriate priority values (0.0-1.0)</li>
+                    <li>✓ Includes changefreq hints for crawlers</li>
+                    <li>✓ Excludes admin and private pages</li>
+                    <li>✓ Uses absolute URLs with protocol</li>
+                  </ul>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {activeSection === 'robots' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              <div>
+                <h4 className="text-lg font-semibold text-white mb-4">Robots.txt Editor</h4>
+                <p className="text-gray-300 mb-6">Control search engine crawler access to your website.</p>
+
+                <div className="bg-gray-700 rounded-lg p-6 border border-gray-600">
+                  <textarea
+                    rows={15}
+                    defaultValue={`# Robots.txt for TapDev Website
+# Generated on ${new Date().toISOString().split('T')[0]}
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /blog-management
+Disallow: /*.json$
+Disallow: /api/
+
+# Sitemap location
+Sitemap: ${window.location.origin}/sitemap.xml
+
+# Googlebot specific rules
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+
+# Block bad bots
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+# Crawl delay for general bots
+Crawl-delay: 10`}
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white font-mono text-sm focus:outline-none focus:border-blue-500"
+                    placeholder="Enter robots.txt content..."
+                  />
+
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-600">
+                    <p className="text-sm text-gray-400">Edit the robots.txt file to control crawler access</p>
+                    <button
+                      onClick={() => alert('Robots.txt saved! Deploy this file to your website root.')}
+                      className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors duration-300"
+                    >
+                      Save Robots.txt
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-yellow-900/20 border border-yellow-500/50 rounded-lg p-4 mt-4">
+                  <h5 className="font-medium text-yellow-400 mb-2">Important Notes</h5>
+                  <ul className="text-sm text-yellow-300 space-y-1">
+                    <li>• Place robots.txt in your website root directory</li>
+                    <li>• Test with Google Search Console robots.txt Tester</li>
+                    <li>• Disallow does not prevent indexing (use noindex meta tag)</li>
+                    <li>• Always include your sitemap URL</li>
+                  </ul>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {activeSection === 'redirects' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-lg font-semibold text-white">301 Redirects Manager</h4>
+                  <button
+                    onClick={() => alert('Add redirect functionality')}
+                    className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors duration-300"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>Add Redirect</span>
+                  </button>
+                </div>
+                <p className="text-gray-300 mb-6">Manage 301 redirects to preserve SEO value when moving pages.</p>
+
+                <div className="bg-gray-700 rounded-lg border border-gray-600 overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-gray-800">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Old URL</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">New URL</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Type</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-600">
+                      <tr className="hover:bg-gray-600">
+                        <td className="px-4 py-3 text-sm text-gray-300">/old-page</td>
+                        <td className="px-4 py-3 text-sm text-gray-300">/new-page</td>
+                        <td className="px-4 py-3"><span className="px-2 py-1 bg-green-600/20 text-green-400 rounded text-xs">301</span></td>
+                        <td className="px-4 py-3">
+                          <button className="text-red-400 hover:text-red-300">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="bg-blue-900/20 border border-blue-500/50 rounded-lg p-4 mt-4">
+                  <h5 className="font-medium text-blue-400 mb-2">301 Redirect Best Practices</h5>
+                  <ul className="text-sm text-blue-300 space-y-1">
+                    <li>• Use 301 redirects for permanent moves to preserve SEO value</li>
+                    <li>• Redirect old URLs to the most relevant new page</li>
+                    <li>• Avoid redirect chains (A → B → C)</li>
+                    <li>• Monitor redirects in Google Search Console</li>
+                    <li>• Update internal links instead of relying on redirects</li>
+                  </ul>
+                </div>
               </div>
             </motion.div>
           )}
